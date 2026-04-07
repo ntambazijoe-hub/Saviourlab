@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saviour High School Workspace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Glassmorphism Utilities */
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .dark .glass {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+        .dark .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .toast-enter { animation: slideInRight 0.3s ease-out forwards; }
+
+        /* Gradient Text */
+        .text-gradient {
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* Loader */
+        .loader {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top: 3px solid #fff;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8' },
+                        secondary: '#64748b',
+                        accent: '#8b5cf6'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 transition-colors duration-300 min-h-screen flex flex-col overflow-x-hidden">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass border-b border-slate-200 dark:border-slate-800 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-3 cursor-pointer" onclick="router.navigate('home')">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center text-white shadow-lg">
+                        <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+                    </div>
+                    <span class="font-bold text-xl tracking-tight hidden sm:block">Saviour<span class="text-primary-600 dark:text-primary-500">High</span></span>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-8">
+                    <button onclick="router.navigate('home')" class="nav-link text-sm font-medium hover:text-primary-600 transition-colors">Home</button>
+                    <button onclick="router.navigate('about')" class="nav-link text-sm font-medium hover:text-primary-600 transition-colors">About Us</button>
+                    <button onclick="router.navigate('features')" class="nav-link text-sm font-medium hover:text-primary-600 transition-colors">Features</button>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+                        <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
+                        <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
+                    </button>
+                    
+                    <div id="auth-buttons" class="flex items-center gap-3">
+                        <button onclick="router.navigate('login')" class="text-sm font-medium hover:text-primary-600">Log in</button>
+                        <button onclick="router.navigate('register')" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-md hover:shadow-lg">Get Started</button>
+                    </div>
+                    
+                    <div id="user-menu" class="hidden items-center gap-3">
+                        <span id="user-greeting" class="text-sm font-medium hidden lg:block"></span>
+                        <button onclick="app.logout()" class="p-2 rounded-full hover:bg-red-100 dark:hover:bg-red-900/30 text-red-500 transition-colors" title="Logout">
+                            <i data-lucide="log-out" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow pt-16 relative">
+        
+        <!-- Toast Container -->
+        <div id="toast-container" class="fixed top-20 right-5 z-50 flex flex-col gap-2"></div>
+
+        <!-- VIEW: HOME -->
+        <section id="view-home" class="page-section min-h-[calc(100vh-4rem)] flex items-center relative overflow-hidden">
+            <!-- Background Blobs -->
+            <div class="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
+                <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-400/20 rounded-full blur-[100px] animate-pulse"></div>
+                <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-violet-400/20 rounded-full blur-[100px] animate-pulse" style="animation-delay: 1s;"></div>
+            </div>
+
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+                <div class="grid lg:grid-cols-2 gap-12 items-center">
+                    <div class="space-y-8 animate-fade-in">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-bold uppercase tracking-wide">
+                            <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                            Academic Year 2026
+                        </div>
+                        <h1 class="text-5xl lg:text-7xl font-bold leading-tight">
+                            Digital Learning <br>
+                            <span class="text-gradient">Reimagined.</span>
+                        </h1>
+                        <p class="text-lg text-slate-600 dark:text-slate-400 max-w-lg leading-relaxed">
+                            A smart platform for Saviour High School students to track lab practice, manage submissions, and accelerate academic growth.
+                        </p>
+                        <div class="flex flex-wrap gap-4">
+                            <button onclick="router.navigate('register')" class="bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 rounded-xl font-semibold transition-all shadow-lg hover:shadow-primary-500/30 flex items-center gap-2">
+                                Join Workspace <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="router.navigate('about')" class="px-8 py-4 rounded-xl font-semibold border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                                Learn More
+                            </button>
+                        </div>
+                        
+                        <div class="pt-8 flex items-center gap-8 text-slate-500 dark:text-slate-400">
+                            <div>
+                                <div class="text-2xl font-bold text-slate-900 dark:text-white" id="stat-users">0+</div>
+                                <div class="text-xs uppercase tracking-wider">Students</div>
+                            </div>
+                            <div class="w-px h-10 bg-slate-300 dark:bg-slate-700"></div>
+                            <div>
+                                <div class="text-2xl font-bold text-slate-900 dark:text-white" id="stat-files">0+</div>
+                                <div class="text-xs uppercase tracking-wider">Files Managed</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="relative hidden lg:block animate-fade-in" style="animation-delay: 0.2s;">
+                        <div class="relative z-10 glass-card rounded-2xl p-6 transform rotate-3 hover:rotate-0 transition-transform duration-500">
+                            <div class="flex items-center justify-between mb-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-pink-500 to-orange-400"></div>
+                                    <div>
+                                        <div class="h-2 w-24 bg-slate-200 dark:bg-slate-700 rounded mb-2"></div>
+                                        <div class="h-2 w-16 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                                    </div>
+                                </div>
+                                <div class="text-green-500 text-sm font-bold">Active</div>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="h-16 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center px-4 gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center"><i data-lucide="file-text" class="w-4 h-4"></i></div>
+                                    <div class="flex-1">
+                                        <div class="h-2 w-3/4 bg-slate-200 dark:bg-slate-700 rounded mb-2"></div>
+                                        <div class="h-2 w-1/2 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                                    </div>
+                                </div>
+                                <div class="h-16 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center px-4 gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center"><i data-lucide="clock" class="w-4 h-4"></i></div>
+                                    <div class="flex-1">
+                                        <div class="h-2 w-2/3 bg-slate-200 dark:bg-slate-700 rounded mb-2"></div>
+                                        <div class="h-2 w-1/3 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                                    </div>
+                                </div>
+                                <div class="h-16 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center px-4 gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-green-100 text-green-600 flex items-center justify-center"><i data-lucide="check-circle" class="w-4 h-4"></i></div>
+                                    <div class="flex-1">
+                                        <div class="h-2 w-1/2 bg-slate-200 dark:bg-slate-700 rounded mb-2"></div>
+                                        <div class="h-2 w-1/4 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Decorative elements behind -->
+                        <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl"></div>
+                        <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-violet-500/20 rounded-full blur-2xl"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW: ABOUT US -->
+        <section id="view-about" class="page-section hidden py-20">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl font-bold mb-6 text-gradient">About Us</h2>
+                    <div class="w-20 h-1 bg-primary-500 mx-auto rounded-full"></div>
+                </div>
+
+                <div class="glass-card rounded-3xl p-8 md:p-12 shadow-xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
+                    
+                    <div class="relative z-10 space-y-8 text-lg leading-relaxed text-slate-600 dark:text-slate-300">
+                        <p class="text-xl font-medium text-slate-900 dark:text-white border-l-4 border-primary-500 pl-4">
+                            Welcome to Saviour High School Workspace — a smart and innovative digital platform designed to empower students in their learning journey.
+                        </p>
+                        
+                        <p>
+                            Our goal is simple: to make computer laboratory practice more organized, interactive, and meaningful. This workspace allows students to record their lab activities, upload their work, and track their personal progress over time. By creating individual accounts, every learner builds a digital footprint of their growth, creativity, and consistency.
+                        </p>
+                        
+                        <p>
+                            For teachers, it provides an easy and efficient way to monitor student participation, review submitted work, and support academic development.
+                        </p>
+                        
+                        <div class="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 my-8">
+                            <p class="italic text-slate-700 dark:text-slate-200">
+                                "At Saviour High School, we believe in combining education with technology to prepare students for the future. This platform reflects our commitment to modern learning — simple, structured, and accessible anytime, anywhere."
+                            </p>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-4 text-center pt-8 border-t border-slate-200 dark:border-slate-700">
+                            <div>
+                                <div class="text-3xl font-bold text-primary-600 mb-1">Learn.</div>
+                            </div>
+                            <div>
+                                <div class="text-3xl font-bold text-primary-600 mb-1">Practice.</div>
+                            </div>
+                            <div>
+                                <div class="text-3xl font-bold text-primary-600 mb-1">Grow.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW: LOGIN -->
+        <section id="view-login" class="page-section hidden min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
+            <div class="w-full max-w-md animate-fade-in">
+                <div class="glass-card rounded-2xl p-8 shadow-2xl">
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl font-bold mb-2">Welcome Back</h2>
+                        <p class="text-slate-500 dark:text-slate-400">Sign in to access your workspace</p>
+                    </div>
+                    
+                    <form onsubmit="app.handleLogin(event)" class="space-y-5">
+                        <div>
+                            <label class="block text-sm font-medium mb-1.5 ml-1">Email Address</label>
+                            <div class="relative">
+                                <i data-lucide="mail" class="absolute left-3 top-3 w-5 h-5 text-slate-400"></i>
+                                <input type="email" id="login-email" required class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all" placeholder="student@school.com">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium mb-1.5 ml-1">Password</label>
+                            <div class="relative">
+                                <i data-lucide="lock" class="absolute left-3 top-3 w-5 h-5 text-slate-400"></i>
+                                <input type="password" id="login-password" required class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all" placeholder="••••••••">
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between text-sm">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="login-teacher" class="rounded text-primary-600 focus:ring-primary-500">
+                                <span class="text-slate-600 dark:text-slate-400">Sign in as Teacher</span>
+                            </label>
+                            <a href="#" class="text-primary-600 hover:underline">Forgot password?</a>
+                        </div>
+
+                        <button type="submit" id="login-btn" class="w-full bg-primary-600 hover:bg-primary-700 text-white py-3 rounded-xl font-semibold shadow-lg shadow-primary-500/30 transition-all flex justify-center items-center gap-2">
+                            <span>Sign In</span>
+                        </button>
+                    </form>
+
+                    <div class="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
+                        Don't have an account? <button onclick="router.navigate('register')" class="text-primary-600 font-semibold hover:underline">Create one</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW: REGISTER -->
+        <section id="view-register" class="page-section hidden min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 py-10">
+            <div class="w-full max-w-2xl animate-fade-in">
+                <div class="glass-card rounded-2xl p-8 shadow-2xl">
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl font-bold mb-2">Create Account</h2>
+                        <p class="text-slate-500 dark:text-slate-400">Join the digital learning revolution</p>
+                    </div>
+                    
+                    <form onsubmit="app.handleRegister(event)" class="space-y-5">
+                        <div class="grid md:grid-cols-2 gap-5">
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium mb-1.5 ml-1">Full Name</label>
+                                <input type="text" id="reg-name" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary-500 outline-none" placeholder="John Doe">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-1.5 ml-1">Class</label>
+                                <select id="reg-class" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary-500 outline-none">
+                                    <option value="">Select Class</option>
+                                    <option value="S1">Senior 1 (S1)</option>
+                                    <option value="S2">Senior 2 (S2)</option>
+                                    <option value="S3">Senior 3 (S3)</option>
+                                    <option value="S4">Senior 4 (S4)</option>
+                                    <option value="S5">Senior 5 (S5)</option>
+                                    <option value="S6">Senior 6 (S6)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium mb-1.5 ml-1">Stream</label>
+                                <select id="reg-stream" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary-500 outline-none">
+                                    <option value="">Select Stream</option>
+                                    <option value="Science">Science</option>
+                                    <option value="Arts">Arts</option>
+                                    <option value="Commerce">Commerce</option>
+                                </select>
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium mb-1.5 ml-1">Combination</label>
+                                <select id="reg-combination" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary-500 outline-none">
+                                    <option value="">Select Subject Combination</option>
+                                    <optgroup label="Science">
+                                        <option value="PCM">PCM (Physics, Chemistry, Math)</option>
+                                        <option value="PCB">PCB (Physics, Chemistry, Biology)</option>
+                                        <option value="PEM">PEM (Physics, Economics, Math)</option>
+                                        <option value="PAM">PAM (Physics, Art, Math)</option>
+                                        <option value="MEA">MEA (Math, Economics, Art)</option>
+                                        <option value="MEE">MEE (Math, Economics, Entrepreneurship)</option>
+                                    </optgroup>
+                                    <optgroup label="Arts">
+                                        <option value="HEG">HEG (History, Economics, Geography)</option>
+                                        <option value="HIL">HIL (History, ICT, Literature)</option>
+                                        <option value="HENTL">HENTL (History, Entrepreneurship, Tourism, Lit)</option>
+                                        <option value="GAL">GAL (Geography, Art, Literature)</option>
+                                        <option value="GEL">GEL (Geography, Entrepreneurship, Literature)</option>
+                                    </optgroup>
+                                    <optgroup label="Commerce">
+                                        <option value="MCE">MCE (Math, Chemistry, Economics)</option>
+                                        <option value="MEG">MEG (Math, Economics, Geography)</option>
+                                        <option value="GEA">GEA (Geography, Economics, Art)</option>
+                                    </optgroup>
+                                    <optgroup label="Languages">
+                                        <option value="LFK">LFK (Languages)</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium mb-1.5 ml-1">Email Address</label>
+                                <input type="email" id="reg-email" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary-500 outline-none" placeholder="john@school.com">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium mb-1.5 ml-1">Password</label>
+                                <input type="password" id="reg-password" required minlength="6" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary-500 outline-none" placeholder="••••••••">
+                            </div>
+                             <div>
+                                <label class="block text-sm font-medium mb-1.5 ml-1">Confirm Password</label>
+                                <input type="password" id="reg-confirm" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary-500 outline-none" placeholder="••••••••">
+                            </div>
+                        </div>
+
+                        <button type="submit" id="reg-btn" class="w-full bg-primary-600 hover:bg-primary-700 text-white py-3 rounded-xl font-semibold shadow-lg shadow-primary-500/30 transition-all mt-4">
+                            Create Account
+                        </button>
+                    </form>
+
+                    <div class="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
+                        Already have an account? <button onclick="router.navigate('login')" class="text-primary-600 font-semibold hover:underline">Sign in</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW: STUDENT DASHBOARD -->
+        <section id="view-student-dashboard" class="page-section hidden min-h-screen bg-slate-100 dark:bg-slate-900">
+            <div class="flex h-screen overflow-hidden">
+                <!-- Sidebar -->
+                <aside class="w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 hidden md:flex flex-col">
+                    <div class="p-6 border-b border-slate-200 dark:border-slate-700">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center text-white font-bold" id="dash-avatar">
+                                JD
+                            </div>
+                            <div>
+                                <div class="font-bold text-sm" id="dash-name">John Doe</div>
+                                <div class="text-xs text-slate-500" id="dash-meta">S4 - Science</div>
+                            </div>
+                        </div>
+                    </div>
+                    <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+                        <button onclick="app.switchStudentTab('overview')" class="dash-tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400" data-tab="overview">
+                            <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Overview
+                        </button>
+                        <button onclick="app.switchStudentTab('practice')" class="dash-tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors" data-tab="practice">
+                            <i data-lucide="clipboard-list" class="w-5 h-5"></i> Lab Practice
+                        </button>
+                        <button onclick="app.switchStudentTab('uploads')" class="dash-tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors" data-tab="uploads">
+                            <i data-lucide="upload-cloud" class="w-5 h-5"></i> My Uploads
+                        </button>
+                    </nav>
+                </aside>
+
+                <!-- Main Content -->
+                <main class="flex-1 overflow-y-auto p-4 md:p-8">
+                    <!-- Mobile Header -->
+                    <div class="md:hidden flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-bold">Dashboard</h2>
+                        <button onclick="app.logout()" class="text-red-500"><i data-lucide="log-out"></i></button>
+                    </div>
+
+                    <!-- Tab: Overview -->
+                    <div id="tab-overview" class="student-tab-content space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="glass-card p-6 rounded-2xl">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="p-3 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600"><i data-lucide="clock" class="w-6 h-6"></i></div>
+                                    <span class="text-xs font-bold text-green-500 bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full">+12%</span>
+                                </div>
+                                <div class="text-3xl font-bold mb-1" id="stat-practice-hours">0h</div>
+                                <div class="text-sm text-slate-500">Practice Hours</div>
+                            </div>
+                            <div class="glass-card p-6 rounded-2xl">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="p-3 rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-600"><i data-lucide="file-check" class="w-6 h-6"></i></div>
+                                </div>
+                                <div class="text-3xl font-bold mb-1" id="stat-total-files">0</div>
+                                <div class="text-sm text-slate-500">Files Uploaded</div>
+                            </div>
+                            <div class="glass-card p-6 rounded-2xl">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="p-3 rounded-lg bg-orange-100 dark:bg-orange-900/30 text-orange-600"><i data-lucide="activity" class="w-6 h-6"></i></div>
+                                </div>
+                                <div class="text-3xl font-bold mb-1" id="stat-sessions">0</div>
+                                <div class="text-sm text-slate-500">Lab Sessions</div>
+                            </div>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6">
+                            <h3 class="text-lg font-bold mb-4">Recent Activity</h3>
+                            <div class="space-y-4" id="recent-activity-list">
+                                <!-- Populated by JS -->
+                                <div class="text-center py-8 text-slate-400 text-sm">No recent activity</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Lab Practice -->
+                    <div id="tab-practice" class="student-tab-content hidden space-y-6">
+                        <div class="glass-card rounded-2xl p-6 md:p-8">
+                            <h3 class="text-2xl font-bold mb-6">Record Lab Session</h3>
+                            <form onsubmit="app.recordPractice(event)" class="space-y-6">
+                                <div class="grid md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Date</label>
+                                        <input type="date" id="practice-date" required class="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none focus:border-primary-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Duration (Minutes)</label>
+                                        <input type="number" id="practice-duration" required min="1" placeholder="e.g. 45" class="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none focus:border-primary-500">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Activity Details</label>
+                                    <textarea id="practice-details" required rows="4" placeholder="Describe what you worked on..." class="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none focus:border-primary-500"></textarea>
+                                </div>
+                                <div class="flex justify-end">
+                                    <button type="submit" class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2.5 rounded-lg font-medium transition-colors shadow-lg shadow-primary-500/30">
+                                        Save Record
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6">
+                            <h3 class="text-lg font-bold mb-4">History</h3>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-sm">
+                                    <thead class="bg-slate-50 dark:bg-slate-800 text-slate-500">
+                                        <tr>
+                                            <th class="p-3 rounded-l-lg">Date</th>
+                                            <th class="p-3">Duration</th>
+                                            <th class="p-3 rounded-r-lg">Details</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="practice-history-body" class="divide-y divide-slate-100 dark:divide-slate-800">
+                                        <!-- Populated by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Uploads -->
+                    <div id="tab-uploads" class="student-tab-content hidden space-y-6">
+                        <div class="glass-card rounded-2xl p-8 border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-primary-500 dark:hover:border-primary-500 transition-colors text-center group">
+                            <input type="file" id="file-upload-input" class="hidden" onchange="app.handleFileUpload(this)">
+                            <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                                <i data-lucide="upload-cloud" class="w-8 h-8 text-slate-400 group-hover:text-primary-500"></i>
+                            </div>
+                            <h3 class="text-lg font-bold mb-2">Upload Assignment</h3>
+                            <p class="text-slate-500 mb-6 max-w-xs mx-auto">Drag and drop files here, or click to browse</p>
+                            <button onclick="document.getElementById('file-upload-input').click()" class="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 px-6 py-2 rounded-lg font-medium transition-colors">
+                                Select File
+                            </button>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6">
+                            <h3 class="text-lg font-bold mb-4">My Files</h3>
+                            <div class="space-y-3" id="files-list-container">
+                                <!-- Populated by JS -->
+                                <div class="text-center py-8 text-slate-400 text-sm">No files uploaded yet</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </main>
+            </div>
+        </section>
+
+        <!-- VIEW: TEACHER DASHBOARD -->
+        <section id="view-teacher-dashboard" class="page-section hidden min-h-screen bg-slate-100 dark:bg-slate-900 p-4 md:p-8">
+            <div class="max-w-7xl mx-auto space-y-8">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-3xl font-bold">Teacher Administration</h1>
+                        <p class="text-slate-500">Manage students and monitor progress</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick="app.logout()" class="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-colors">Logout</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="glass-card p-6 rounded-2xl md:col-span-1 bg-gradient-to-br from-blue-500 to-blue-600 text-white border-none">
+                        <div class="text-blue-100 mb-1">Total Students</div>
+                        <div class="text-4xl font-bold" id="teacher-stat-students">0</div>
+                    </div>
+                    <div class="glass-card p-6 rounded-2xl md:col-span-1">
+                        <div class="text-slate-500 mb-1">Total Practice Hours</div>
+                        <div class="text-3xl font-bold" id="teacher-stat-hours">0</div>
+                    </div>
+                    <div class="glass-card p-6 rounded-2xl md:col-span-1">
+                        <div class="text-slate-500 mb-1">Files Submitted</div>
+                        <div class="text-3xl font-bold" id="teacher-stat-files">0</div>
+                    </div>
+                    <div class="glass-card p-6 rounded-2xl md:col-span-1">
+                        <div class="text-slate-500 mb-1">Pending Reviews</div>
+                        <div class="text-3xl font-bold text-orange-500" id="teacher-stat-pending">0</div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl overflow-hidden">
+                    <div class="p-6 border-b border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">Student Registry</h3>
+                        <input type="text" id="teacher-search" onkeyup="app.filterTeacherTable()" placeholder="Search students..." class="px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none focus:border-primary-500 text-sm w-full sm:w-64">
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 dark:bg-slate-800 text-slate-500">
+                                <tr>
+                                    <th class="p-4">Name</th>
+                                    <th class="p-4">Class</th>
+                                    <th class="p-4">Combination</th>
+                                    <th class="p-4">Stream</th>
+                                    <th class="p-4">Practice (Hrs)</th>
+                                    <th class="p-4">Files</th>
+                                </tr>
+                            </thead>
+                            <tbody id="teacher-student-list" class="divide-y divide-slate-100 dark:divide-slate-800">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- Icons Init ---
+        lucide.createIcons();
+
+        // --- Theme Management ---
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        
+        // Check theme on load
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+
+        // --- Router ---
+        const router = {
+            currentPage: 'home',
+            navigate(pageId) {
+                // Hide all sections
+                document.querySelectorAll('.page-section').forEach(el => {
+                    el.classList.add('hidden');
+                    el.classList.remove('animate-fade-in');
+                });
+                
+                // Show target
+                const target = document.getElementById(`view-${pageId}`);
+                if (target) {
+                    target.classList.remove('hidden');
+                    target.classList.add('animate-fade-in');
+                    this.currentPage = pageId;
+                    window.scrollTo(0, 0);
+                }
+
+                // Update Nav State
+                if(pageId === 'home' || pageId === 'about') {
+                    document.getElementById('auth-buttons').classList.remove('hidden');
+                    document.getElementById('user-menu').classList.add('hidden');
+                }
+                
+                // Refresh stats if home
+                if(pageId === 'home') app.updatePublicStats();
+            }
+        };
+
+        // --- Application State & Logic ---
+        const app = {
+            currentUser: null,
+            data: {
+                users: [],
+                practice: [],
+                files: []
+            },
+
+            init() {
+                // Load data from localStorage
+                const storedUsers = localStorage.getItem('shs_users');
+                const storedPractice = localStorage.getItem('shs_practice');
+                const storedFiles = localStorage.getItem('shs_files');
+                
+                if(storedUsers) this.data.users = JSON.parse(storedUsers);
+                if(storedPractice) this.data.practice = JSON.parse(storedPractice);
+                if(storedFiles) this.data.files = JSON.parse(storedFiles);
+
+                // Check session
+                const session = sessionStorage.getItem('shs_session');
+                if(session) {
+                    this.currentUser = JSON.parse(session);
+                    this.updateUIForUser();
+                } else {
+                    this.updatePublicStats();
+                }
+            },
+
+            saveData() {
+                localStorage.setItem('shs_users', JSON.stringify(this.data.users));
+                localStorage.setItem('shs_practice', JSON.stringify(this.data.practice));
+                localStorage.setItem('shs_files', JSON.stringify(this.data.files));
+            },
+
+            // Auth Actions
+            handleRegister(e) {
+                e.preventDefault();
+                const btn = document.getElementById('reg-btn');
+                const originalText = btn.innerText;
+                btn.innerHTML = '<div class="loader"></div>';
+                btn.disabled = true;
+
+                const name = document.getElementById('reg-name').value;
+                const email = document.getElementById('reg-email').value;
+                const password = document.getElementById('reg-password').value;
+                const confirm = document.getElementById('reg-confirm').value;
+                
+                if(password !== confirm) {
+                    this.showToast('Passwords do not match', 'error');
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                    return;
+                }
+
+                // Check existing
+                if(this.data.users.find(u => u.email === email)) {
+                    this.showToast('Email already registered', 'error');
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                    return;
+                }
+
+                const newUser = {
+                    id: Date.now(),
+                    name,
+                    email,
+                    password, // In real app, hash this!
+                    class: document.getElementById('reg-class').value,
+                    stream: document.getElementById('reg-stream').value,
+                    combination: document.getElementById('reg-combination').value,
+                    role: 'student',
+                    createdAt: new Date().toISOString()
+                };
+
+                this.data.users.push(newUser);
+                this.saveData();
+
+                setTimeout(() => {
+                    this.showToast('Account created successfully!', 'success');
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                    router.navigate('login');
+                }, 1000);
+            },
+
+            handleLogin(e) {
+                e.preventDefault();
+                const btn = document.getElementById('login-btn');
+                const originalContent = btn.innerHTML;
+                btn.innerHTML = '<div class="loader"></div>';
+                btn.disabled = true;
+
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+                const isTeacher = document.getElementById('login-teacher').checked;
+
+                setTimeout(() => {
+                    let user;
+                    if(isTeacher) {
+                        // Demo Teacher Account
+                        if(email === 'teacher@shs.com' && password === 'admin') {
+                            user = { id: 'teacher_001', name: 'Admin Teacher', role: 'teacher', email: 'teacher@shs.com' };
+                        }
+                    } else {
+                        user = this.data.users.find(u => u.email === email && u.password === password);
+                    }
+
+                    if(user) {
+                        this.currentUser = user;
+                        sessionStorage.setItem('shs_session', JSON.stringify(user));
+                        this.showToast(`Welcome back, ${user.name}!`, 'success');
+                        this.updateUIForUser();
+                    } else {
+                        this.showToast('Invalid credentials', 'error');
+                        btn.innerHTML = originalContent;
+                        btn.disabled = false;
+                    }
+                }, 800);
+            },
+
+            logout() {
+                this.currentUser = null;
+                sessionStorage.removeItem('shs_session');
+                document.getElementById('auth-buttons').classList.remove('hidden');
+                document.getElementById('user-menu').classList.add('hidden');
+                router.navigate('home');
+                this.showToast('Logged out successfully');
+            },
+
+            updateUIForUser() {
+                document.getElementById('auth-buttons').classList.add('hidden');
+                document.getElementById('user-menu').classList.remove('hidden');
+                document.getElementById('user-menu').classList.add('flex');
+                document.getElementById('user-greeting').innerText = `Hi, ${this.currentUser.name.split(' ')[0]}`;
+
+                if(this.currentUser.role === 'teacher') {
+                    router.navigate('teacher-dashboard');
+                    this.renderTeacherDashboard();
+                } else {
+                    router.navigate('student-dashboard');
+                    this.renderStudentDashboard();
+                }
+            },
+
+            // Student Dashboard Logic
+            renderStudentDashboard() {
+                // Sidebar Info
+                document.getElementById('dash-name').innerText = this.currentUser.name;
+                document.getElementById('dash-meta').innerText = `${this.currentUser.class} - ${this.currentUser.stream}`;
+                document.getElementById('dash-avatar').innerText = this.currentUser.name.charAt(0).toUpperCase();
+                
+                // Stats
+                const myPractice = this.data.practice.filter(p => p.studentId === this.currentUser.id);
+                const totalMinutes = myPractice.reduce((acc, curr) => acc + parseInt(curr.duration), 0);
+                const myFiles = this.data.files.filter(f => f.studentId === this.currentUser.id);
+
+                document.getElementById('stat-practice-hours').innerText = (totalMinutes / 60).toFixed(1) + 'h';
+                document.getElementById('stat-total-files').innerText = myFiles.length;
+                document.getElementById('stat-sessions').innerText = myPractice.length;
+
+                // History Table
+                const tbody = document.getElementById('practice-history-body');
+                tbody.innerHTML = '';
+                if(myPractice.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-slate-400">No records yet</td></tr>';
+                } else {
+                    [...myPractice].reverse().forEach(p => {
+                        tbody.innerHTML += `
+                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                <td class="p-3 text-slate-600 dark:text-slate-400">${new Date(p.date).toLocaleDateString()}</td>
+                                <td class="p-3 font-medium">${p.duration} min</td>
+                                <td class="p-3 text-slate-600 dark:text-slate-400 truncate max-w-xs">${p.details}</td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                // Recent Activity (Combined)
+                const activityList = document.getElementById('recent-activity-list');
+                activityList.innerHTML = '';
+                const activities = [
+                    ...myPractice.map(p => ({ type: 'practice', date: p.date, text: `Recorded ${p.duration} min practice` })),
+                    ...myFiles.map(f => ({ type: 'file', date: f.date, text: `Uploaded ${f.name}` }))
+                ].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+
+                if(activities.length === 0) {
+                    activityList.innerHTML = '<div class="text-center py-4 text-slate-400 text-sm">No recent activity</div>';
+                } else {
+                    activities.forEach(act => {
+                        const icon = act.type === 'practice' ? 'clock' : 'file';
+                        const color = act.type === 'practice' ? 'text-blue-500 bg-blue-100 dark:bg-blue-900/30' : 'text-purple-500 bg-purple-100 dark:bg-purple-900/30';
+                        
+                        activityList.innerHTML += `
+                            <div class="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                <div class="w-8 h-8 rounded-full ${color} flex items-center justify-center flex-shrink-0">
+                                    <i data-lucide="${icon}" class="w-4 h-4"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="text-sm font-medium">${act.text}</div>
+                                    <div class="text-xs text-slate-400">${new Date(act.date).toLocaleDateString()}</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    lucide.createIcons();
+                }
+
+                // Files List
+                const filesContainer = document.getElementById('files-list-container');
+                filesContainer.innerHTML = '';
+                if(myFiles.length === 0) {
+                    filesContainer.innerHTML = '<div class="text-center py-8 text-slate-400 text-sm">No files uploaded yet</div>';
+                } else {
+                    [...myFiles].reverse().forEach(f => {
+                        filesContainer.innerHTML += `
+                            <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                                <div class="flex items-center gap-3 overflow-hidden">
+                                    <div class="w-8 h-8 rounded bg-blue-100 dark:bg-blue-900/50 text-blue-600 flex items-center justify-center flex-shrink-0">
+                                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                                    </div>
+                                    <div class="truncate">
+                                        <div class="text-sm font-medium truncate">${f.name}</div>
+                                        <div class="text-xs text-slate-400">${(f.size / 1024).toFixed(1)} KB • ${new Date(f.date).toLocaleDateString()}</div>
+                                    </div>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Saved</span>
+                            </div>
+                        `;
+                    });
+                    lucide.createIcons();
+                }
+            },
+
+            switchStudentTab(tabName) {
+                // Update buttons
+                document.querySelectorAll('.dash-tab-btn').forEach(btn => {
+                    if(btn.dataset.tab === tabName) {
+                        btn.classList.remove('text-slate-600', 'dark:text-slate-400', 'hover:bg-slate-50');
+                        btn.classList.add('bg-primary-50', 'text-primary-700', 'dark:bg-primary-900/20', 'dark:text-primary-400');
+                    } else {
+                        btn.classList.add('text-slate-600', 'dark:text-slate-400', 'hover:bg-slate-50');
+                        btn.classList.remove('bg-primary-50', 'text-primary-700', 'dark:bg-primary-900/20', 'dark:text-primary-400');
+                    }
+                });
+
+                // Update content
+                document.querySelectorAll('.student-tab-content').forEach(content => content.classList.add('hidden'));
+                document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+                
+                if(tabName === 'practice') {
+                    document.getElementById('practice-date').valueAsDate = new Date();
+                }
+            },
+
+            recordPractice(e) {
+                e.preventDefault();
+                const newRecord = {
+                    id: Date.now(),
+                    studentId: this.currentUser.id,
+                    date: document.getElementById('practice-date').value,
+                    duration: document.getElementById('practice-duration').value,
+                    details: document.getElementById('practice-details').value,
+                    createdAt: new Date().toISOString()
+                };
+                
+                this.data.practice.push(newRecord);
+                this.saveData();
+                this.showToast('Practice session recorded!', 'success');
+                e.target.reset();
+                document.getElementById('practice-date').valueAsDate = new Date();
+                this.renderStudentDashboard(); // Refresh stats
+            },
+
+            handleFileUpload(input) {
+                if(input.files && input.files[0]) {
+                    const file = input.files[0];
+                    // Simulate upload
+                    const newFile = {
+                        id: Date.now(),
+                        studentId: this.currentUser.id,
+                        name: file.name,
+                        size: file.size,
+                        type: file.type,
+                        date: new Date().toISOString()
+                    };
+                    
+                    this.data.files.push(newFile);
+                    this.saveData();
+                    this.showToast('File uploaded successfully', 'success');
+                    this.renderStudentDashboard();
+                }
+            },
+
+            // Teacher Dashboard Logic
+            renderTeacherDashboard() {
+                const students = this.data.users.filter(u => u.role !== 'teacher');
+                document.getElementById('teacher-stat-students').innerText = students.length;
+                
+                const totalMinutes = this.data.practice.reduce((acc, curr) => acc + parseInt(curr.duration), 0);
+                document.getElementById('teacher-stat-hours').innerText = (totalMinutes / 60).toFixed(1);
+                
+                document.getElementById('teacher-stat-files').innerText = this.data.files.length;
+                document.getElementById('teacher-stat-pending').innerText = Math.floor(Math.random() * 5); // Mock pending
+
+                const tbody = document.getElementById('teacher-student-list');
+                tbody.innerHTML = '';
+
+                students.forEach(s => {
+                    const sPractice = this.data.practice.filter(p => p.studentId === s.id);
+                    const sFiles = this.data.files.filter(f => f.studentId === s.id);
+                    const mins = sPractice.reduce((acc, curr) => acc + parseInt(curr.duration), 0);
+
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                            <td class="p-4 font-medium">${s.name}</td>
+                            <td class="p-4 text-slate-500">${s.class}</td>
+                            <td class="p-4 text-slate-500">${s.combination}</td>
+                            <td class="p-4"><span class="px-2 py-1 rounded text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">${s.stream}</span></td>
+                            <td class="p-4 font-mono text-sm">${(mins/60).toFixed(1)} hrs</td>
+                            <td class="p-4 font-mono text-sm">${sFiles.length}</td>
+                        </tr>
+                    `;
+                });
+            },
+
+            filterTeacherTable() {
+                const term = document.getElementById('teacher-search').value.toLowerCase();
+                const rows = document.querySelectorAll('#teacher-student-list tr');
+                rows.forEach(row => {
+                    const text = row.innerText.toLowerCase();
+                    row.style.display = text.includes(term) ? '' : 'none';
+                });
+            },
+
+            // Utilities
+            showToast(message, type = 'success') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                
+                const colors = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+                const icon = type === 'success' ? 'check-circle' : 'alert-circle';
+
+                toast.className = `${colors} text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 toast-enter transform transition-all duration-300`;
+                toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i> <span class="font-medium">${message}</span>`;
+                
+                container.appendChild(toast);
+                lucide.createIcons();
+
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateX(100%)';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            },
+
+            updatePublicStats() {
+                document.getElementById('stat-users').innerText = this.data.users.length + '+';
+                document.getElementById('stat-files').innerText = this.data.files.length + '+';
+            }
+        };
+
+        // Start App
+        window.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+
+    </script>
+</body>
+</html>
